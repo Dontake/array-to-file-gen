@@ -1,0 +1,22 @@
+{
+    "name": "domtake/array-to-file-generator",
+    "description": "CLI for generating file from array object",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "authors": [
+        {
+            "name": "Vlad Kiryakov",
+            "email": "wlad.kiryakov@gmail.com"
+        }
+    ],
+    "require": {
+      "ext-dom": "*",
+        "ext-http": "*",
+      "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Domtake\\ArrayToFileGenerator\\": "src/"
+        }
+    }
+}
