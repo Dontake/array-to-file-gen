@@ -3,6 +3,7 @@
 namespace Domtake\ArrayToFileGenerator\Json;
 
 use Domtake\ArrayToFileGenerator\File;
+use Exception;
 
 class JsonFile implements File
 {
@@ -16,11 +17,17 @@ class JsonFile implements File
 
     public function create()
     {
-        $json_file = fopen($this->path, 'w');
+        try {
+            $json_file = fopen($this->path, 'w');
 
-        fwrite($json_file, json_encode($this->workersArray));
+            fwrite($json_file, json_encode($this->workersArray, JSON_UNESCAPED_UNICODE));
 
-        fclose($json_file);
-        echo "workers.json created successfully!";
+            fclose($json_file);
+
+            echo "workers.json created successfully!";
+        } catch (Exception $e) {
+            // if file can't create
+            echo $e->getMessage();
+        }
     }
 }

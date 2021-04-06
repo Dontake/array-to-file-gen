@@ -29,8 +29,14 @@ $workersArray = [
     ],
 ];
 
+if ($argc != 3 || in_array($argv[1], array('--help', '-help', '-h', '-?'))) {
+    echo 'Доступные опции --type, --output';
+}
 
-$type = 'xml';
-$path = __DIR__. '\\workers.'.$type;
+$type = substr(strrchr($argv[1], '='), 1);
+$output = substr(strrchr($argv[2], '='), 1);
+
+$fileName = "workers.$type";
+$path = __DIR__.'\\'.$output.'\\'.$fileName;
 
 Generator::fileGenerator($workersArray, $path, $type);

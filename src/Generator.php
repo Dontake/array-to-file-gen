@@ -21,11 +21,10 @@ class Generator
      * Create file
      *
      * @param Creator $creator
-     * @return File
      */
-    static function createFile(Creator $creator): File
+    static function createFile(Creator $creator)
     {
-        return $creator->createFileFromPath();
+        $creator->createFileFromPath();
     }
 
     /**

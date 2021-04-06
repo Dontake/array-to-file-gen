@@ -3,6 +3,7 @@
 namespace Domtake\ArrayToFileGenerator\Csv;
 
 use Domtake\ArrayToFileGenerator\File;
+use Exception;
 
 /**
  * Class CsvFile
@@ -31,23 +32,28 @@ class CsvFile implements File
      */
     public function create()
     {
-        $csv_file = fopen($this->path, 'w');
-        $this->writeRows($this->workersArray, $csv_file);
+        try {
+            $csv_file = fopen($this->path, 'w');
+            $this->writeRows($this->workersArray, $csv_file);
 
-        foreach ($this->workersArray as $item) {
-            fputcsv($csv_file, $item, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+            foreach ($this->workersArray as $item) {
+                fputcsv($csv_file, $item, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
 
-            foreach ($item as $element) {
-                fputcsv($csv_file, $element, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                foreach ($item['employees'] as $employee) {
+                    fputcsv($csv_file, $employee, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
 
-                foreach ($element as $row) {
-                    fputcsv($csv_file, $row, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                    foreach ($employee['employees'] as $element) {
+                        fputcsv($csv_file, $element, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                    }
                 }
             }
-        }
 
-        fclose($csv_file);
-        echo "workers.csv created successfully!";
+            fclose($csv_file);
+            echo "workers.csv created successfully!";
+        } catch (Exception $e) {
+            // if file can't create
+            echo $e->getMessage();
+        }
     }
 
     /**
@@ -60,16 +66,8 @@ class CsvFile implements File
     {
         $csv_rows = null;
 
-        foreach ($workersArray as $row1) {
-            $csv_rows = array_keys($row1);
-
-            foreach ($row1 as $row2) {
-                $csv_rows = array_keys($row2);
-
-                foreach ($row2 as $row3) {
-                    $csv_rows = array_keys($row3);
-                }
-            }
+        foreach ($workersArray as $row) {
+            $csv_rows = array_keys($row[0]);
         }
 
         fputcsv($csv_file, $csv_rows, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
