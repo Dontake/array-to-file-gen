@@ -4,6 +4,8 @@ namespace Domtake\ArrayToFileGenerator\Csv;
 
 use Domtake\ArrayToFileGenerator\File;
 use Exception;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Class CsvFile
@@ -33,20 +35,11 @@ class CsvFile implements File
     public function create()
     {
         try {
+            $workersArray = $this->workersArray;
             $csv_file = fopen($this->path, 'w');
-            $this->writeRows($this->workersArray, $csv_file);
+            $this->writeRows($workersArray, $csv_file);
 
-            foreach ($this->workersArray as $item) {
-                fputcsv($csv_file, $item, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
-
-                foreach ($item['employees'] as $employee) {
-                    fputcsv($csv_file, $employee, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
-
-                    foreach ($employee['employees'] as $element) {
-                        fputcsv($csv_file, $element, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
-                    }
-                }
-            }
+            fputcsv($csv_file, $workersArray, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
 
             fclose($csv_file);
             echo "workers.csv created successfully!";
@@ -66,9 +59,7 @@ class CsvFile implements File
     {
         $csv_rows = null;
 
-        foreach ($workersArray as $row) {
-            $csv_rows = array_keys($row[0]);
-        }
+        $csv_rows = array_keys($workersArray);
 
         fputcsv($csv_file, $csv_rows, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
     }
