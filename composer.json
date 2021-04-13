@@ -12,7 +12,6 @@
     "require": {
         "php": ">=7.3",
         "ext-dom": "*",
-        "ext-http": "*",
         "ext-json": "*"
     },
     "autoload": {
