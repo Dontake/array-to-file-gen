@@ -10,9 +10,10 @@
         }
     ],
     "require": {
-      "ext-dom": "*",
+        "php": ">=7.3",
+        "ext-dom": "*",
         "ext-http": "*",
-      "ext-json": "*"
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
