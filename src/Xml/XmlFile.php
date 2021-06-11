@@ -3,6 +3,7 @@
 namespace Domtake\ArrayToFileGenerator\Xml;
 
 use DOMDocument;
+use DOMElement;
 use Domtake\ArrayToFileGenerator\File;
 use http\Exception;
 
@@ -10,17 +11,17 @@ class XmlFile implements File
 {
     protected $xmlDoc, $root, $version = '1.0';
 
-    private $workersArray, $path;
+    private $enteringArray, $path;
 
 
-    public function __construct(array $workersArray, string $path)
+    public function __construct(array $enteringArray, string $path)
     {
-        $this->workersArray = $workersArray;
+        $this->enteringArray = $enteringArray;
         $this->path = $path;
 
         $this->xmlDoc = new domDocument($this->version, "utf-8");
 
-        $this->root = $this->xmlDoc->createElement("urlset");
+        $this->root = $this->xmlDoc->createElement("doc");
         $this->xmlDoc->appendChild($this->root);
     }
 
@@ -33,16 +34,10 @@ class XmlFile implements File
     {
         $this->xmlDoc->formatOutput = true;
 
-        foreach ($this->workersArray as $key => $value) {
-            $this->createNode($value);
+        $page = $this->createDOM($this->enteringArray);
 
-            foreach ($value as $k => $v) {
-                $this->createNode($v);
-
-                foreach ($v as $a => $b) {
-                    $this->createNode($b);
-                }
-            }
+        if ($page) {
+            $this->root->appendChild($page);
         }
 
         try {
@@ -62,16 +57,23 @@ class XmlFile implements File
     /**
      * Create node of xml document
      *
-     * @param array $page array of values $page_array
+     * @param $value
+     * @param string $key
+     * @return DOMElement
      */
-    protected function createNode(array $page)
+    protected function createDOM($value, $key = 'item'): DOMElement
     {
-        $url = $this->xmlDoc->createElement("url");
-        $this->root->appendChild($url);
-
-        foreach ($page as $key => $value) {
-            $element = $this->xmlDoc->createElement($key, $value);
-            $url->appendChild($element);
+        if (!is_array($value)) {
+            return $this->xmlDoc->createElement($key, $value);
         }
+
+        $item = $this->xmlDoc->createElement($key);
+
+        foreach ($value as $k => $v) {
+            $element = !empty($k) && !is_int($k) ? $k : 'item';
+            $item->appendChild($this->createDOM($v, $element));
+        }
+
+        return $item;
     }
 }

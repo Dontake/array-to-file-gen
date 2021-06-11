@@ -4,8 +4,6 @@ namespace Domtake\ArrayToFileGenerator\Csv;
 
 use Domtake\ArrayToFileGenerator\File;
 use Exception;
-use RecursiveArrayIterator;
-use RecursiveIteratorIterator;
 
 /**
  * Class CsvFile
@@ -36,13 +34,25 @@ class CsvFile implements File
     {
         try {
             $workersArray = $this->workersArray;
-            $csv_file = fopen($this->path, 'w');
-            $this->writeRows($workersArray, $csv_file);
+            $csvFile = fopen($this->path, 'w');
 
-            fputcsv($csv_file, $workersArray, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+            $csvData = $this->createCsvData($workersArray);
+            $record = false;
 
-            fclose($csv_file);
-            echo "workers.csv created successfully!";
+            if (!empty($csvData) && is_array($csvData)) {
+
+                foreach ($csvData as $csvDatum) {
+                    fputcsv($csvFile, $csvDatum, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+                }
+
+                $record = true;
+            }
+
+            fclose($csvFile);
+
+            if ($record) {
+                echo "workers.csv created successfully!";
+            }
         } catch (Exception $e) {
             // if file can't create
             echo $e->getMessage();
@@ -61,6 +71,67 @@ class CsvFile implements File
 
         $csv_rows = array_keys($workersArray);
 
-        fputcsv($csv_file, $csv_rows, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+        $this->putCSV($csv_file, $csv_rows);
+    }
+
+    /**
+     * Recursive write array to .csv file
+     *
+     * @param $csv_file
+     * @param $value
+     * @param array $offset
+     * @return void
+     */
+    protected function putCSV($csv_file, $value, $offset = [])
+    {
+        if (!is_array($value)) {
+            return;
+        }
+
+        $filteredValue = array_filter($value, function ($key) {
+            return !is_array($key);
+        });
+
+        if (!empty($filteredValue)) {
+            $result = array_merge($offset, $filteredValue);
+
+            fputcsv($csv_file, $result, self::DELIMITER, self::ENCLOSURE, self::ESCAPE_CHAR);
+
+            array_push($offset, '');
+        }
+
+        foreach ($value as $item) {
+            $this->putCSV($csv_file, $item, $offset);
+        }
+    }
+
+    /**
+     * Create array of arrays
+     *
+     * @param array $data
+     * @param array $offset
+     * @return array|void
+     */
+    protected function createCsvData(array $data, $offset = []): array
+    {
+        $items = [];
+        $csvData = [];
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $tempOffset = is_int($key) ? $offset : array_merge($offset, ['']);
+                $csvData = array_merge($csvData, $this->createCsvData($value, $tempOffset));
+            } else {
+                $items[] = $value;
+            }
+        }
+
+        $result = array_merge($offset, $items);
+
+        if (!empty($items)) {
+            array_unshift($csvData, $result);
+        }
+
+        return $csvData;
     }
 }
